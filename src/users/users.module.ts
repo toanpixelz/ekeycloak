@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { KeycloakService } from './keycloak.service';
+import { UserController } from './users.controller';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  providers: [UsersService],
-  exports: [UsersService]
+  providers: [KeycloakService],
+  exports: [KeycloakService],
+  controllers: [UserController],
+  imports: [HttpModule],
 })
 export class UsersModule {}

@@ -7,23 +7,25 @@ import { UsersModule } from './users/users.module';
 import {
   AuthGuard,
   KeycloakConnectModule,
-  PolicyEnforcementMode,
   ResourceGuard,
   RoleGuard,
-  TokenValidation,
 } from 'nest-keycloak-connect';
 import { APP_GUARD } from '@nestjs/core';
 
 @Module({
-  imports: [AuthModule, UsersModule,
+  imports: [
+    AuthModule,
+    UsersModule,
     KeycloakConnectModule.register({
       authServerUrl: 'http://localhost:9081/keycloak',
-      realm: 'quarkus',
+      realm: 'nestjs-demo',
       clientId: 'my-nestjs-app',
-      secret: 'DpBbZikenm3AfKhApkDWrK4YczIPDPPw',
-    })],
+      secret: 'RxylCIcs7EeTQWyb2tGkFXbO43VRjWGE',
+    }),
+  ],
   controllers: [AppController],
-  providers: [AppService,
+  providers: [
+    AppService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
@@ -35,7 +37,8 @@ import { APP_GUARD } from '@nestjs/core';
     {
       provide: APP_GUARD,
       useClass: RoleGuard,
-    }],
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
