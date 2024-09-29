@@ -17,7 +17,7 @@ import { APP_GUARD } from '@nestjs/core';
     AuthModule,
     UsersModule,
     KeycloakConnectModule.register({
-      authServerUrl: 'http://localhost:9081/keycloak',
+      authServerUrl: 'http://localhost:9082',
       realm: 'nestjs-demo',
       clientId: 'my-nestjs-app',
       secret: 'RxylCIcs7EeTQWyb2tGkFXbO43VRjWGE',

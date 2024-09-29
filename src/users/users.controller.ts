@@ -25,10 +25,10 @@ export class UserController {
     await this.keycloakService.createUser(userRepresentation);
   }
 
-  @Put(':user-id')
+  @Put('/:id')
   async updateUser(
     @Body() userRepresentation: UserRepresentation,
-    @Param('user-id') userId: string,
+    @Param('id') userId: string,
   ): Promise<void> {
     await this.keycloakService.updateUser(userId, userRepresentation);
   }
