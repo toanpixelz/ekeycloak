@@ -1,16 +1,15 @@
 import {
-  Controller,
-  Post,
   Body,
-  Headers,
-  Param,
+  Controller,
   Delete,
-  Put,
   Get,
+  Param,
+  Post,
+  Put,
 } from '@nestjs/common';
 import { KeycloakService } from './keycloak.service';
 import { UserRepresentation } from '../dto/keycloak/UserRepresentation';
-import { Roles, Unprotected } from "nest-keycloak-connect";
+import { Roles, Unprotected } from 'nest-keycloak-connect';
 import { CredentialRepresentation } from '../dto/keycloak/CredentialRepresentation';
 
 @Controller('users')
@@ -33,18 +32,18 @@ export class UserController {
     await this.keycloakService.updateUser(userId, userRepresentation);
   }
 
-  @Get(':user-id')
-  async getUser(@Param('user-id') userId: string): Promise<void> {
+  @Get(':id')
+  async getUser(@Param('id') userId: string): Promise<void> {
     await this.keycloakService.getUser(
       userId,
       await this.keycloakService.getToken(),
     );
   }
 
-  @Put(':user-id/change-password')
+  @Put(':id/change-password')
   async changePassword(
     @Body() userRepresentation: CredentialRepresentation,
-    @Param('user-id') userId: string,
+    @Param('id') userId: string,
   ): Promise<void> {
     await this.keycloakService.resetPassword(
       userId,
@@ -59,14 +58,12 @@ export class UserController {
     await this.keycloakService.resetPasswordByEmail(username);
   }
 
-  @Delete(':user-id')
-  @Roles({roles: ["realm:admin"]})
-  async deleteUser(@Param('user-id') userId: string): Promise<void> {
+  @Delete(':id')
+  @Roles({ roles: ['realm:admin'] })
+  async deleteUser(@Param('id') userId: string): Promise<void> {
     await this.keycloakService.deleteUser(
       userId,
       await this.keycloakService.getToken(),
     );
   }
-
-
 }
