@@ -3,6 +3,7 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { UserRepresentation } from '../dto/keycloak/UserRepresentation';
 import { CredentialRepresentation } from '../dto/keycloak/CredentialRepresentation';
+import { RoleRepresentation } from '../dto/keycloak/RoleRepresentation';
 
 @Injectable()
 export class KeycloakService {
@@ -34,9 +35,18 @@ export class KeycloakService {
         ),
       );
 
-      let users = await  this.getUsersByUserName(userRepresentation.username,token);
-      let user  = users[0];
-      await this.sendVerifyEmail(user.id,this.redirectUrl,this.lifespan,this.clientId,token);
+      let users = await this.getUsersByUserName(
+        userRepresentation.username,
+        token,
+      );
+      let user = users[0];
+      await this.sendVerifyEmail(
+        user.id,
+        this.redirectUrl,
+        this.lifespan,
+        this.clientId,
+        token,
+      );
     } catch (error) {
       console.log('create user exception ', error);
       throw new Error(`Failed to create user: ${error.message}`);
@@ -45,7 +55,7 @@ export class KeycloakService {
 
   async getUsersByUserName(
     username: string,
-    token: string
+    token: string,
   ): Promise<UserRepresentation[]> {
     const url = `${this.keycloakAdminUrl}/users`;
     const params = new URLSearchParams({
@@ -101,7 +111,9 @@ export class KeycloakService {
         ),
       );
     } catch (error) {
-      console.log(`Failed to send verification email to user with ID ${userId}: ${error.message}`)
+      console.log(
+        `Failed to send verification email to user with ID ${userId}: ${error.message}`,
+      );
     }
   }
 
@@ -127,10 +139,9 @@ export class KeycloakService {
   async updateUser(
     userId: string,
     userRepresentation: UserRepresentation,
-    token: string,
   ): Promise<void> {
     const url = `${this.keycloakAdminUrl}/users/${userId}`;
-
+    let token = await this.getToken();
     try {
       await firstValueFrom(
         this.httpService.put(url, userRepresentation, {
@@ -190,7 +201,7 @@ export class KeycloakService {
     }
   }
 
-  private async getToken() {
+  async getToken() {
     return await this.loginClient();
   }
 
@@ -214,17 +225,14 @@ export class KeycloakService {
     }
   }
 
-  async resetPasswordViaEmail(
-    userId: string,
-    clientId: string,
-    redirectUri: string,
-    token: string,
-  ): Promise<void> {
-    const url = `${this.keycloakAdminUrl}/users/${userId}/reset-password-email`;
+  async resetPasswordByEmail(username: string): Promise<void> {
+    var token = await this.getToken();
+    let user  = await this.getUsersByUserName(username, token);
+    const url = `${this.keycloakAdminUrl}/users/${user[0].id}/reset-password-email`;
 
     const params = new URLSearchParams({
-      client_id: clientId,
-      redirect_uri: redirectUri,
+      client_id: this.clientId,
+      redirect_uri: this.redirectUrl,
     });
 
     try {
@@ -242,7 +250,103 @@ export class KeycloakService {
       );
     } catch (error) {
       throw new Error(
-        `Failed to send password reset email to user with ID ${userId}: ${error.message}`,
+        `Failed to send password reset email to user with username ${username}: ${error.message}`,
+      );
+    }
+  }
+
+  async getRoleByName(
+    roleName: string,
+    token: string,
+  ): Promise<RoleRepresentation> {
+    const url = `${this.keycloakAdminUrl}/roles/${roleName}`;
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<RoleRepresentation>(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch role with name ${roleName}: ${error.message}`,
+      );
+    }
+  }
+
+  async assignRole(
+    userId: string,
+    keycloakRoles: RoleRepresentation[],
+    token: string,
+  ): Promise<void> {
+    const url = `${this.keycloakAdminUrl}/users/${userId}/role-mappings/realm`;
+
+    try {
+      await firstValueFrom(
+        this.httpService.post(
+          url,
+          keycloakRoles, // Request body containing roles
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+    } catch (error) {
+      throw new Error(
+        `Failed to assign roles to user with ID ${userId}: ${error.message}`,
+      );
+    }
+  }
+
+  async removeUserRoles(
+    userId: string,
+    keycloakRoles: RoleRepresentation[],
+    token: string,
+  ): Promise<void> {
+    const url = `${this.keycloakAdminUrl}/users/${userId}/role-mappings/realm`;
+
+    try {
+      await firstValueFrom(
+        this.httpService.delete(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          data: keycloakRoles, // Request body containing roles
+        }),
+      );
+    } catch (error) {
+      throw new Error(
+        `Failed to de-assign roles from user with ID ${userId}: ${error.message}`,
+      );
+    }
+  }
+
+  async getUserRoles(
+    userId: string,
+    token: string,
+  ): Promise<RoleRepresentation[]> {
+    const url = `${this.keycloakAdminUrl}/users/${userId}/role-mappings/realm/available`;
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<RoleRepresentation[]>(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch available roles for user with ID ${userId}: ${error.message}`,
       );
     }
   }
