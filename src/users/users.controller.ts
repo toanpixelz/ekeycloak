@@ -11,8 +11,10 @@ import { KeycloakService } from './keycloak.service';
 import { UserRepresentation } from '../dto/keycloak/UserRepresentation';
 import { Roles, Unprotected } from 'nest-keycloak-connect';
 import { CredentialRepresentation } from '../dto/keycloak/CredentialRepresentation';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('users')
+@ApiBearerAuth()
 export class UserController {
   constructor(private readonly keycloakService: KeycloakService) {}
 
