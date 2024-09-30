@@ -1,0 +1,16 @@
+keycloak:
+  domain: http://localhost:9082
+  realm:
+  login:
+    url: {{keycloak.domain}}/realms/{{keycloak.realm}}/protocol/openid-connect/token
+  admin:
+    host: {{keycloak.domain}}/admin/realms/{{keycloak.realm}}
+    lifespan: 88997
+    redirectUrl: http:localhost:4200
+    client:
+      id: admin-cl
+      secret: SY188uaULvFe4axXUIUeN4MUBcfSdnnV
+  app:
+    client:
+      id: my-nestjs-app
+      secret: RxylCIcs7EeTQWyb2tGkFXbO43VRjWGE

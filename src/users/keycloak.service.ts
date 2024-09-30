@@ -4,20 +4,27 @@ import { firstValueFrom } from 'rxjs';
 import { UserRepresentation } from '../dto/keycloak/UserRepresentation';
 import { CredentialRepresentation } from '../dto/keycloak/CredentialRepresentation';
 import { RoleRepresentation } from '../dto/keycloak/RoleRepresentation';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class KeycloakService {
   private readonly keycloakAdminUrl =
     'http://localhost:9082/admin/realms/nestjs-demo';
 
-  private readonly keycloakLoginUrl =
+  private keycloakLoginUrl =
     'http://localhost:9082/realms/nestjs-demo/protocol/openid-connect/token';
-  private readonly clientId = 'admin-cli';
-  private readonly clientSecret = 'SY188uaULvFe4axXUIUeN4MUBcfSdnnV';
-  private readonly lifespan = '88997';
+  private clientId = 'admin-cli';
+  private clientSecret = 'SY188uaULvFe4axXUIUeN4MUBcfSdnnV';
+  private lifespan = '88997';
   private readonly redirectUrl = 'http:localhost:3000';
 
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {
+    this.lifespan = configService.get<string>('keycloak_admin.linkLifeSpan');
+    // this.keycloakAdminUrl = configService.get<string>('keycloak_admin.baseURL');
+  }
 
   async createUser(userRepresentation: UserRepresentation): Promise<void> {
     try {
@@ -35,11 +42,11 @@ export class KeycloakService {
         ),
       );
 
-      let users = await this.getUsersByUserName(
+      const users = await this.getUsersByUserName(
         userRepresentation.username,
         token,
       );
-      let user = users[0];
+      const user = users[0];
       await this.sendVerifyEmail(
         user.id,
         this.redirectUrl,
@@ -141,7 +148,7 @@ export class KeycloakService {
     userRepresentation: UserRepresentation,
   ): Promise<void> {
     const url = `${this.keycloakAdminUrl}/users/${userId}`;
-    let token = await this.getToken();
+    const token = await this.getToken();
     try {
       await firstValueFrom(
         this.httpService.put(url, userRepresentation, {
@@ -226,8 +233,8 @@ export class KeycloakService {
   }
 
   async resetPasswordByEmail(username: string): Promise<void> {
-    var token = await this.getToken();
-    let user  = await this.getUsersByUserName(username, token);
+    const token = await this.getToken();
+    const user = await this.getUsersByUserName(username, token);
     const url = `${this.keycloakAdminUrl}/users/${user[0].id}/reset-password-email`;
 
     const params = new URLSearchParams({

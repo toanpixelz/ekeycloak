@@ -11,11 +11,17 @@ import {
   RoleGuard,
 } from 'nest-keycloak-connect';
 import { APP_GUARD } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
+import configuration from './config/configuration';
 
 @Module({
   imports: [
     AuthModule,
     UsersModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
+    }),
     KeycloakConnectModule.register({
       authServerUrl: 'http://localhost:9082',
       realm: 'nestjs-demo',
