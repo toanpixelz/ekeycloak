@@ -8,27 +8,27 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class KeycloakService {
-  private readonly keycloakAdminUrl =
-    'http://localhost:9082/admin/realms/nestjs-demo';
-
-  private keycloakLoginUrl =
-    'http://localhost:9082/realms/nestjs-demo/protocol/openid-connect/token';
-  private clientId = 'admin-cli';
-  private clientSecret = 'SY188uaULvFe4axXUIUeN4MUBcfSdnnV';
-  private lifespan = '88997';
-  private readonly redirectUrl = 'http:localhost:3000';
+  keycloakAdminUrl = this.configService.get<string>('keycloak_admin.baseURL');
+  keycloakLoginUrl = this.configService.get<string>('keycloak.login_url');
+  clientId = this.configService.get<string>('keycloak_admin.clientId');
+  clientSecret = this.configService.get<string>('keycloak_admin.clientSecret');
+  lifespan = this.configService.get<string>('keycloak_admin.linkLifeSpan');
+  redirectUrl = this.configService.get<string>(
+    'keycloak_admin.clientRedirectUrl',
+  );
 
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
-  ) {
-    this.lifespan = configService.get<string>('keycloak_admin.linkLifeSpan');
-    // this.keycloakAdminUrl = configService.get<string>('keycloak_admin.baseURL');
-  }
+  ) {}
 
   async createUser(userRepresentation: UserRepresentation): Promise<void> {
     try {
+      console.log('keycloakLoginUrl ' + this.keycloakLoginUrl);
+      console.log('clientId ' + this.clientId);
+      console.log('clientSecret ' + this.clientSecret);
       const token = await this.getToken();
+
       await firstValueFrom(
         this.httpService.post(
           `${this.keycloakAdminUrl}/users`,
