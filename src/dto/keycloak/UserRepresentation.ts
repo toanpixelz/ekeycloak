@@ -1,6 +1,6 @@
 import { CredentialRepresentation } from './CredentialRepresentation';
 
-export interface UserRepresentation {
+export class UserRepresentation {
   id?: string;
   username?: string;
   firstName?: string;

@@ -12,6 +12,8 @@ import { UserRepresentation } from '../dto/keycloak/UserRepresentation';
 import { Roles, Unprotected } from 'nest-keycloak-connect';
 import { CredentialRepresentation } from '../dto/keycloak/CredentialRepresentation';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { NewUser } from '../dto/user/new-user';
+import { UpdateUser } from '../dto/user/update-user';
 
 @Controller('users')
 @ApiBearerAuth()
@@ -20,18 +22,16 @@ export class UserController {
 
   @Post()
   @Unprotected()
-  async createUser(
-    @Body() userRepresentation: UserRepresentation,
-  ): Promise<void> {
-    await this.keycloakService.createUser(userRepresentation);
+  async createUser(@Body() newUser: NewUser): Promise<void> {
+    await this.keycloakService.createUser(newUser);
   }
 
   @Put('/:id')
   async updateUser(
-    @Body() userRepresentation: UserRepresentation,
+    @Body() updateUser1: UpdateUser,
     @Param('id') userId: string,
   ): Promise<void> {
-    await this.keycloakService.updateUser(userId, userRepresentation);
+    await this.keycloakService.updateUser(userId, updateUser1);
   }
 
   @Get(':id')

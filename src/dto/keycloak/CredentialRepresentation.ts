@@ -1,4 +1,4 @@
-export interface CredentialRepresentation {
+export class CredentialRepresentation {
   id?: string;
   type?: string;
   userLabel?: string;
