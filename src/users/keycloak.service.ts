@@ -26,9 +26,7 @@ export class KeycloakService {
 
   async createUser(newUser: NewUser): Promise<void> {
     try {
-      console.log('keycloakLoginUrl ' + this.keycloakLoginUrl);
-      console.log('clientId ' + this.clientId);
-      console.log('clientSecret ' + this.clientSecret);
+
       const token = await this.getToken();
       const credential = new CredentialRepresentation();
       credential.type = 'password';
