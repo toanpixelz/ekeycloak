@@ -68,6 +68,7 @@ export class KeycloakService {
     const params = new URLSearchParams({
       first: '0',
       max: '1',
+      exact: 'true',
       username,
     });
 
