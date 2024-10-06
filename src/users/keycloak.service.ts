@@ -5,6 +5,8 @@ import { UserRepresentation } from '../dto/keycloak/UserRepresentation';
 import { CredentialRepresentation } from '../dto/keycloak/CredentialRepresentation';
 import { RoleRepresentation } from '../dto/keycloak/RoleRepresentation';
 import { ConfigService } from '@nestjs/config';
+import { NewUser } from '../dto/user/new-user';
+import { UpdateUser } from '../dto/user/update-user';
 
 @Injectable()
 export class KeycloakService {
@@ -22,13 +24,22 @@ export class KeycloakService {
     private readonly configService: ConfigService,
   ) {}
 
-  async createUser(userRepresentation: UserRepresentation): Promise<void> {
+  async createUser(newUser: NewUser): Promise<void> {
     try {
-      console.log('keycloakLoginUrl ' + this.keycloakLoginUrl);
-      console.log('clientId ' + this.clientId);
-      console.log('clientSecret ' + this.clientSecret);
-      const token = await this.getToken();
 
+      const token = await this.getToken();
+      const credential = new CredentialRepresentation();
+      credential.type = 'password';
+      credential.value = newUser.password;
+      credential.temporary = false;
+      const userRepresentation = new UserRepresentation();
+      userRepresentation.credentials = [credential];
+      userRepresentation.username = newUser.username;
+      userRepresentation.email = newUser.username;
+      userRepresentation.firstName = newUser.firstName;
+      userRepresentation.lastName = newUser.lastName;
+      userRepresentation.enabled = true;
+      userRepresentation.emailVerified = false;
       await firstValueFrom(
         this.httpService.post(
           `${this.keycloakAdminUrl}/users`,
@@ -144,15 +155,12 @@ export class KeycloakService {
     }
   }
 
-  async updateUser(
-    userId: string,
-    userRepresentation: UserRepresentation,
-  ): Promise<void> {
+  async updateUser(userId: string, updateUser1: UpdateUser): Promise<void> {
     const url = `${this.keycloakAdminUrl}/users/${userId}`;
     const token = await this.getToken();
     try {
       await firstValueFrom(
-        this.httpService.put(url, userRepresentation, {
+        this.httpService.put(url, updateUser1, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
