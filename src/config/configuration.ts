@@ -2,10 +2,6 @@
 
 export default () => ({
   port: parseInt(process.env.PORT, 10) || 3000,
-  database: {
-    host: process.env.DATABASE_HOST || 'localhost',
-    port: parseInt(process.env.DATABASE_PORT, 10) || 5432,
-  },
   keycloak: {
     realm: process.env.KEYCLOAK_REALM || 'demo-realm',
     login_url:
@@ -21,9 +17,5 @@ export default () => ({
     linkLifeSpan: process.env.KEYCLOAK_ADMIN_LINK_LIFESPAN || '88997',
     clientRedirectUrl:
       process.env.KEYCLOAK_ADMIN_REDIRECT_URL || 'http:localhost:4200',
-  },
-  keycloak_client_facing: {
-    clientId: process.env.KEYCLOAK_CLIENT_FACING_CLIENT_ID || 'demo-nestjs-app',
-    clientSecret: process.env.KEYCLOAK_CLIENT_FACING_CLIENT_SECRET || 'test',
-  },
+  }
 });

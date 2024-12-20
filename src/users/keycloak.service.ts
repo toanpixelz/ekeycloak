@@ -24,7 +24,7 @@ export class KeycloakService {
     private readonly configService: ConfigService,
   ) {}
 
-  async createUser(newUser: NewUser): Promise<void> {
+  async createUser(newUser: NewUser): Promise<UserRepresentation> {
     try {
 
       const token = await this.getToken();
@@ -58,13 +58,14 @@ export class KeycloakService {
         token,
       );
       const user = users[0];
-      await this.sendVerifyEmail(
-        user.id,
-        this.redirectUrl,
-        this.lifespan,
-        this.clientId,
-        token,
-      );
+      // await this.sendVerifyEmail(
+      //   user.id,
+      //   this.redirectUrl,
+      //   this.lifespan,
+      //   this.clientId,
+      //   token,
+      // );
+     return user;
     } catch (error) {
       console.log('create user exception ', error);
       throw new Error(`Failed to create user: ${error.message}`);
@@ -147,6 +148,7 @@ export class KeycloakService {
           },
         }),
       );
+      console.log(`data response: ${JSON.stringify(response.data)}`);
       return response.data;
     } catch (error) {
       throw new Error(

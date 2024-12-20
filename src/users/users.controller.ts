@@ -22,8 +22,8 @@ export class UserController {
 
   @Post()
   @Unprotected()
-  async createUser(@Body() newUser: NewUser): Promise<void> {
-    await this.keycloakService.createUser(newUser);
+  async createUser(@Body() newUser: NewUser): Promise<UserRepresentation> {
+    return await this.keycloakService.createUser(newUser);
   }
 
   @Put('/:id')
@@ -35,11 +35,12 @@ export class UserController {
   }
 
   @Get(':id')
-  async getUser(@Param('id') userId: string): Promise<void> {
-    await this.keycloakService.getUser(
+  async getUser(@Param('id') userId: string): Promise<any> {
+    const data = await this.keycloakService.getUser(
       userId,
       await this.keycloakService.getToken(),
     );
+    return data;
   }
 
   @Put(':id/change-password')
@@ -61,11 +62,18 @@ export class UserController {
   }
 
   @Delete(':id')
-  @Roles({ roles: ['realm:admin'] })
+  // @Roles({ roles: ['realm:offline_access'] })
+  // @Roles({ roles: ['realm:offline_access'] })
+  @Roles({ roles: ['admin_resource'] })
+
   async deleteUser(@Param('id') userId: string): Promise<void> {
+    console.log(`=========== Delete user ${userId} ==============`);
+    const token = await this.keycloakService.getToken();
+    console.log(`=========== Token: ${token} ==============`);
+
     await this.keycloakService.deleteUser(
       userId,
-      await this.keycloakService.getToken(),
+      token
     );
   }
 }
